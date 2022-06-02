@@ -48,7 +48,7 @@ class ControllerNode(Node):
             # 5: turn 180 degrees away from wall SLOW (for accuracy)
             5: {
                 "linear": 0.0,
-                "angular": 0.06
+                "angular": 0.5
             },
             # 6: move away from wall
             6: {
@@ -103,9 +103,11 @@ class ControllerNode(Node):
         self.turn_start_pose = 0
         self.turn_pose = 0
 
-        self.sensors = [Sensor('front_right', [0.0,0.2,math.pi], 5, -1), Sensor('front',[0.1,0.2,(math.pi/2)], 5, -1), Sensor('back_right',[-0.1,-0.2,0], 5, -1), Sensor("back_left",[0.0,-0.2,0], 5, -1),]
+        self.sensors = [Sensor('front_right', [0.0,0.2,math.pi], 5, -1), Sensor('front',[0.0,0.2,(3*math.pi/2)], 5, -1), Sensor('back_right',[-0.1,-0.2,0], 5, -1), Sensor("back_left",[0.0,-0.2,0], 5, -1),]
         
-        self.map = Localization(self.sensors,0.08)
+        self.map = Localization(self.sensors,0.1)
+
+        self.index = 0
 
         
 
@@ -218,7 +220,8 @@ class ControllerNode(Node):
         # self.map.insert_sensor_point("back_right", self.rear_right)
         # self.map.insert_sensor_point("back_left", self.rear_left)
         # self.map.update_matrix_map(self.center_right, 1)
-        self.map.print_map()
+        self.index = self.index +1
+        self.map.print_map(self.index)
 
         # 1 turning Right to the wall
         if self.stage == 1 and abs(self.center) < 0.35 : # Wall in front jump to stage 4
@@ -229,7 +232,7 @@ class ControllerNode(Node):
             #self.get_logger().info(f"GOING TO STAGE: {self.stage}",throttle_duration_sec=0.5)
             
             
-        elif self.stage == 1 and self.center_right < 0.22 : # Too close to the wall on Right jump to stage 2
+        elif self.stage == 1 and self.center_right < 0.23 : # Too close to the wall on Right jump to stage 2
             self.click_reset()
             self.stage += 1
             #self.get_logger().info(f"GOING TO STAGE: {self.stage}",throttle_duration_sec=0.5)
@@ -238,6 +241,15 @@ class ControllerNode(Node):
             self.click_reset()
             self.stage += 2
             #self.get_logger().info(f"GOING TO STAGE: {self.stage}",throttle_duration_sec=0.5)
+
+        elif self.stage == 1 and self.center_right - self.rear_right < 0 : # parallel to the wall on Right jump to stage 3
+            self.click_reset()
+            self.stage += 1
+            #self.get_logger().info(f"GOING TO STAGE: {self.stage}",throttle_duration_sec=0.5)
+        
+        elif self.stage == 1:
+            self.map.insert_sensor_point("front_right", self.center_right)
+            self.map.insert_sensor_point("back_left", self.rear_left)
 
         # 2 turning Left away from the wall
 
@@ -252,15 +264,26 @@ class ControllerNode(Node):
             self.pose_reset()
             self.stage += 2 
             #self.get_logger().info(f"GOING TO STAGE: {self.stage}",throttle_duration_sec=0.5)
+
+        elif self.stage == 2 and abs(self.center_right - self.rear_right) < 0.005 : # parallel to the wall on Right jump to stage 3
+            self.click_reset()
+            self.stage += 1
+            #self.get_logger().info(f"GOING TO STAGE: {self.stage}",throttle_duration_sec=0.5)
+
+        elif self.stage == 2:
+            self.map.insert_sensor_point("front_right", self.center_right)
+            self.map.insert_sensor_point("back_left", self.rear_left)
         
         # 3 Go straight
 
-        if self.stage == 3 and self.center < 0.35 : # Wall in front jump to stage 4
-            self.count_left() 
-            self.count_right_reset()
-            self.click_reset()
+        if self.stage == 3 and self.center < 0.35 and self.center_right - self.rear_right < 0 : # Wall in front jump to stage 4
             self.pose_reset()
             self.stage += 1
+            #self.get_logger().info(f"GOING TO STAGE: {self.stage}",throttle_duration_sec=0.5)
+
+        elif self.stage == 3 and self.center < 0.35 and self.center_right - self.rear_right >= 0 : # Wall in front jump to stage 4
+            self.pose_reset()
+            self.stage += 2
             #self.get_logger().info(f"GOING TO STAGE: {self.stage}",throttle_duration_sec=0.5)
 
         elif self.stage == 3 and self.center_right < 0.18: # too close jump stage 2 
@@ -277,9 +300,9 @@ class ControllerNode(Node):
             self.map.insert_sensor_point("front_right", self.center_right)
             self.map.insert_sensor_point("back_left", self.rear_left)
         
-        # 4 Turn 90 degrees 
+        # 4 Turn 90 degrees or more
 
-        if self.stage == 4 and self.turn_left_pose() >= (math.pi/3) and abs(self.center_right - self.rear_right) < 0.005 :
+        if self.stage == 4 and self.turn_left_pose() >= (3*math.pi/8) and abs(self.center_right - self.rear_right) < 0.01 :
             self.count_right()
             self.count_left_reset()
             self.click_reset()
@@ -287,6 +310,19 @@ class ControllerNode(Node):
             #self.get_logger().info(f"GOING TO STAGE: {self.stage}",throttle_duration_sec=0.5)
 
         elif self.stage == 4:
+            self.map.insert_sensor_point("front_right", self.center_right)
+            self.map.insert_sensor_point("back_left", self.rear_left)
+
+        # 5 Turn 90 degrees or less
+
+        if self.stage == 5 and abs(self.center_right - self.rear_right) < 0.01 :
+            self.count_right()
+            self.count_left_reset()
+            self.click_reset()
+            self.stage -=4
+            #self.get_logger().info(f"GOING TO STAGE: {self.stage}",throttle_duration_sec=0.5)
+
+        elif self.stage == 5:
             self.map.insert_sensor_point("front_right", self.center_right)
             self.map.insert_sensor_point("back_left", self.rear_left)
         
@@ -473,8 +509,8 @@ class Localization:
     
     def get_slope(self, p1, p2):
 
-        print (p1)
-        print (p2)
+        #print (p1)
+        #print (p2)
         if (p2[0] - p1[0] != 0):
             return (p2[1] - p1[1]) / (p2[0] - p1[0])
         else:
@@ -635,7 +671,7 @@ class Localization:
                         3  |  2
                     '''
                 
-                print()
+                #print()
                 lines_to_fill.append([s_pose_coords[1], order[0][1], s_pose_coords[0]]) # 
                 lines_to_fill.append([order[0][1], order[1][1], order[0][0]])
                 lines_to_fill.append([order[1][1], matrix_position, position_square])
@@ -751,7 +787,7 @@ class Localization:
         # self.insert_value_map(sensor_coords[0], sensor_coords[1], 5)
         print(modified_pose)
         print(square_number, matrix_position)
-        print()
+        #print()
         
         self.fill_in_line_of_sight(square_number, matrix_position, absolute_position, [pose_coords, modified_pose])
         
@@ -805,7 +841,7 @@ class Localization:
                     for i in range(self.max_dim-len(self.map[square][r])):
                         self.map[square][r].append(0)
 
-    def print_map(self):
+    def print_map(self, index):
         '''Normalizes the current map, and prints out a '''
         
         
@@ -841,8 +877,8 @@ class Localization:
                 final_map += '\n'
                 
         self.map_print = final_map
-        print(np.array(self.matrix_map))
-        Printing.view_map(self.matrix_map)
+        #print(np.array(self.matrix_map))
+        Printing.view_map(self.matrix_map, index)
 
 class Helpers:
     def __init__():
@@ -935,7 +971,7 @@ class Printing:
         if v == 3:
             return (0, 255, 0)
     @staticmethod
-    def view_map(matrix, type=1):
+    def view_map(matrix, index, type=1):
         if type == 0:
             pass #print(np.array(matrix))
         else:
@@ -949,7 +985,8 @@ class Printing:
                     pixels[i,j] = Printing.get_color(matrix[i][j]) # (v, v, v) # Set the colour accordingly
 
             # img.show()
-            img.save('test.bmp')
+            
+            img.save('Maze'+str(index)+'.bmp')
             
             
 # Printing.view_map([
