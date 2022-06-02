@@ -49,7 +49,7 @@ While running the program it creates a Maze0.bmp file and updates it everytime t
 
 ### Screenshots
 
-![Maze](Mapping-Outputs/test3.png?raw=true "Title")
-![Maze](Mapping-Outputs/test4.png?raw=true "Title")
-![Maze](Mapping-Outputs/LowresMAze.bmp?raw=true "Title")
+![Maze](Screenshots&Videos/test3.png?raw=true "Title")
+![Maze](Screenshots&Videos/test4.png?raw=true "Title")
+![Maze](Screenshots&Videos/LowresMAze.bmp?raw=true "Title")
 
