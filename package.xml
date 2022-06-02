@@ -7,6 +7,9 @@
   <maintainer email="eneregemen@gmail.com">usi</maintainer>
   <license>TODO: License declaration</license>
   
+  <exec_depend>rclpy</exec_depend>
+  <exec_depend>std_msgs</exec_depend>
+  
   <depend>thymioid</depend>
   <depend>tf_transformations</depend>
 
