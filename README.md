@@ -26,7 +26,7 @@ Open CoppeliaSim:
 $ ~/apps/CoppeliaSim_Edu_V4_3_0_Ubuntu20_04/coppeliaSim.sh
 ```
 
-Load the first world, `Wall.ttt`, from the Coppelia GUI, enable real-time mode and start the simulation.
+Load the first world, `Maze.ttt` or `Maze.withdoor.ttt` or `room.ttt` or `Test.ttt`, from the Coppelia GUI, enable real-time mode and start the simulation.
 
 Open a second terminal and start the Robomaster ROS bridge:
 
@@ -39,13 +39,16 @@ Open a third terminal, source your workspace and launch `align.launch.py`, which
 
 ```shell
 $ source ~/dev_ws/install/setup.bash
+$ colcon build --packages-select Robomaster_Maze
 $ ros2 launch Robomaster_Maze controller.launch.py robomaster_name:=robo1
 ```
 
+While running the program it creates a Maze0.bmp file and updates it everytime there is an update to the map and it can be found at ~/dev_ws
+
+
+
 ### Screenshots
 
-![Maze](Mapping-Outputs/test0 3.png?raw=true "Title")
 ![Maze](Mapping-Outputs/test0 4.png?raw=true "Title")
-![Maze](Mapping-Outputs/LowresMAze.bmp?raw=true "Title")
-![Maze](Mapping-Outputs/My Maze Movie.mp4?raw=true "Title")
+
 
