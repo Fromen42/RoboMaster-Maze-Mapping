@@ -11,13 +11,6 @@ from geometry_msgs.msg import Quaternion
 import sys
 import math
 
-
-import os
-import time
-
-
-
-
 class ControllerNode(Node):
     def __init__(self):
         super().__init__('controller_node')
@@ -211,41 +204,29 @@ class ControllerNode(Node):
 
 
     def determine_stage(self):
-        #os.system('clear')
-        #self.get_logger().info(f"Orientation: {self.turn_left_pose()} Sensor Forward: {self.center} Sensor Front Right: {self.center_right} Sensor Rear Right: {self.rear_right} Sensor Rear Left: {self.rear_left}",throttle_duration_sec=0.5)
-        
-        self.map.update_current_pose([self.pose2d[0], self.pose2d[1], self.pose2d[2]])#self.pose2d)
-        # self.map.insert_sensor_point("front_right", self.center_right)
-        # self.map.insert_sensor_point("front", self.center)
-        # self.map.insert_sensor_point("back_right", self.rear_right)
-        # self.map.insert_sensor_point("back_left", self.rear_left)
-        # self.map.update_matrix_map(self.center_right, 1)
-        self.index = self.index +1
+        ''''''
+        self.map.update_current_pose([self.pose2d[0], self.pose2d[1], self.pose2d[2]])
+
+        # self.index = self.index +1
         self.map.print_map(self.index)
 
         # 1 turning Right to the wall
         if self.stage == 1 and abs(self.center) < 0.35 : # Wall in front jump to stage 4
-
             self.click_reset()
             self.pose_reset()
             self.stage += 3
-            #self.get_logger().info(f"GOING TO STAGE: {self.stage}",throttle_duration_sec=0.5)
-            
             
         elif self.stage == 1 and self.center_right < 0.23 : # Too close to the wall on Right jump to stage 2
             self.click_reset()
             self.stage += 1
-            #self.get_logger().info(f"GOING TO STAGE: {self.stage}",throttle_duration_sec=0.5)
 
         elif self.stage == 1 and abs(self.center_right - self.rear_right) < 0.005 : # parallel to the wall on Right jump to stage 3
             self.click_reset()
             self.stage += 2
-            #self.get_logger().info(f"GOING TO STAGE: {self.stage}",throttle_duration_sec=0.5)
 
         elif self.stage == 1 and self.center_right - self.rear_right < 0 : # parallel to the wall on Right jump to stage 3
             self.click_reset()
             self.stage += 1
-            #self.get_logger().info(f"GOING TO STAGE: {self.stage}",throttle_duration_sec=0.5)
         
         elif self.stage == 1:
             self.map.insert_sensor_point("front_right", self.center_right)
@@ -257,18 +238,17 @@ class ControllerNode(Node):
             self.distance_to_wall = self.center
             self.click_reset()
             self.stage -= 1
-            #self.get_logger().info(f"GOING TO STAGE: {self.stage}",throttle_duration_sec=0.5)
+
 
         elif self.stage == 2 and self.center < 0.35 : # Wall in front jump to stage 4
             self.click_reset()
             self.pose_reset()
             self.stage += 2 
-            #self.get_logger().info(f"GOING TO STAGE: {self.stage}",throttle_duration_sec=0.5)
 
         elif self.stage == 2 and abs(self.center_right - self.rear_right) < 0.005 : # parallel to the wall on Right jump to stage 3
             self.click_reset()
             self.stage += 1
-            #self.get_logger().info(f"GOING TO STAGE: {self.stage}",throttle_duration_sec=0.5)
+
 
         elif self.stage == 2:
             self.map.insert_sensor_point("front_right", self.center_right)
@@ -279,22 +259,18 @@ class ControllerNode(Node):
         if self.stage == 3 and self.center < 0.35 and self.center_right - self.rear_right < 0 : # Wall in front jump to stage 4
             self.pose_reset()
             self.stage += 1
-            #self.get_logger().info(f"GOING TO STAGE: {self.stage}",throttle_duration_sec=0.5)
 
         elif self.stage == 3 and self.center < 0.35 and self.center_right - self.rear_right >= 0 : # Wall in front jump to stage 4
             self.pose_reset()
             self.stage += 2
-            #self.get_logger().info(f"GOING TO STAGE: {self.stage}",throttle_duration_sec=0.5)
 
         elif self.stage == 3 and self.center_right < 0.18: # too close jump stage 2 
             self.click_reset()
-            #self.get_logger().info(f"GOING TO STAGE: {self.stage}",throttle_duration_sec=0.5)
             self.stage -= 1
         
         elif self.stage == 3 and self.center_right > 0.40: # too far jump stage 1
             self.click_reset()
             self.stage -= 2
-            #self.get_logger().info(f"GOING TO STAGE: {self.stage}",throttle_duration_sec=0.5)
         
         elif self.stage == 3:
             self.map.insert_sensor_point("front_right", self.center_right)
@@ -307,7 +283,7 @@ class ControllerNode(Node):
             self.count_left_reset()
             self.click_reset()
             self.stage -=3
-            #self.get_logger().info(f"GOING TO STAGE: {self.stage}",throttle_duration_sec=0.5)
+
 
         elif self.stage == 4:
             self.map.insert_sensor_point("front_right", self.center_right)
@@ -320,16 +296,15 @@ class ControllerNode(Node):
             self.count_left_reset()
             self.click_reset()
             self.stage -=4
-            #self.get_logger().info(f"GOING TO STAGE: {self.stage}",throttle_duration_sec=0.5)
+
 
         elif self.stage == 5:
             self.map.insert_sensor_point("front_right", self.center_right)
             self.map.insert_sensor_point("back_left", self.rear_left)
         
 
-         
-
     def update_callback(self):
+        ''''''
         cmd_vel = Twist() 
 
         self.determine_stage()
@@ -370,6 +345,7 @@ class Sensor:
 class Localization:
     def __init__(self, sensors, precision=0.05):
         '''
+        Layout of the squares to form the complete localization matrix
                         1  |  0
                         -------
                         3  |  2
@@ -508,9 +484,6 @@ class Localization:
                 self.insert_value_map(line[2], point, 2)
     
     def get_slope(self, p1, p2):
-
-        #print (p1)
-        #print (p2)
         if (p2[0] - p1[0] != 0):
             return (p2[1] - p1[1]) / (p2[0] - p1[0])
         else:
@@ -540,17 +513,9 @@ class Localization:
         
         s_pose_coords = sensor_pose[0]
         s_pose =  sensor_pose[1] # pose coords of the sensor
-        # print('custom')
-        # print(s_pose_coords)
-        # print(s_pose)
-        # print("checking")
-        # print(self.pose_coords)
-        # print(self.pose)
-        # exit()
+
         if s_pose_coords[0] == position_square:
-            print("case 0")
             lines_to_fill.append([s_pose_coords[1], matrix_position, s_pose_coords[0]]) 
-            # exit()
             return self.fill_lines(lines_to_fill)
         
         x_intercept = None
@@ -558,7 +523,7 @@ class Localization:
         
         
         if abs(s_pose_coords[0] - position_square) == 2:
-            print("case 1")
+
             # one position is up, one is down. Must find x_intercept
             if s_pose[0] == absolute_position[0]:
                 # vertical line. can simply draw the vertical line
@@ -574,7 +539,7 @@ class Localization:
                 lines_to_fill.append([intercept_coords[1], matrix_position, position_square])
                 
         elif abs(s_pose_coords[0] - position_square) == 1 and sum([s_pose_coords[0], position_square]) != 3:
-            print("case 2")
+
             # one position is right, one is left: Line goes horizontal (but not diagonal!). There is a slope
             y_intercept = self.get_y_intercept(s_pose[:2], absolute_position)
             intercept_coords = self.get_matrix_coords(y_intercept)
@@ -583,7 +548,7 @@ class Localization:
             lines_to_fill.append([intercept_coords[1], matrix_position, position_square])
              
         elif abs(s_pose_coords[0] + position_square) == 3:
-            print("case 3")
+
             # is diagonal. We will need both intersection points
             x_intercept = self.get_x_intercept(s_pose, absolute_position)
             y_intercept = self.get_y_intercept(s_pose, absolute_position)
@@ -611,9 +576,7 @@ class Localization:
                 # checking to see what square is in
                 if slope_points > 0:
                     # in either 3 or 0
-                    # print(s_pose[0], s_pose[1])
                     if s_pose[0] > 0:
-                        # print("in 0")
                         # in 0
                         if x_smaller:
                             # x intercept
@@ -625,7 +588,6 @@ class Localization:
                             order =  [y_intercept_coords, x_intercept_coords]
                         
                     else:
-                        # print("in 3")
                         # in 3
                         if x_smaller:
                             # x intersept
@@ -636,12 +598,11 @@ class Localization:
                             # y intercept
                             y_intercept_coords[0] = 2
                             order =  [y_intercept_coords, x_intercept_coords]
-                        # in 0
-                        # x_intercept_coords[0] = 
+
+
                 else:
                     # in either 1 or 2
                     if s_pose[0] > 0:
-                        # print("in 2")
                         # in 2
                         if x_smaller:
                             # y intercept
@@ -653,7 +614,6 @@ class Localization:
                             x_intercept_coords[0] = 0
                             order =  [x_intercept_coords, y_intercept_coords]
                     else:
-                        # print("in 1")
                         # in 1
                         if x_smaller:
                             # x intercept
@@ -664,18 +624,10 @@ class Localization:
                             y_intercept_coords[0] = 0
                             order =  [y_intercept_coords, x_intercept_coords]
                     
-                    
-                    '''
-                        1  |  0
-                        -------
-                        3  |  2
-                    '''
                 
-                #print()
                 lines_to_fill.append([s_pose_coords[1], order[0][1], s_pose_coords[0]]) # 
                 lines_to_fill.append([order[0][1], order[1][1], order[0][0]])
                 lines_to_fill.append([order[1][1], matrix_position, position_square])
-        
         
         else:
             print("WARNING: LINE DETECTION FAILED. CONSIDER VERIFYING ERROR. CODE: 5")
@@ -685,6 +637,7 @@ class Localization:
 
     def apply_square_multipliers(self, intercept):
         '''
+        The four squares with their respetive locations
                         1  |  0
                         -------
                         3  |  2
@@ -717,7 +670,7 @@ class Localization:
             3: past or present pose of the robot
             4: 
         '''
-        # print("LALALA")
+
         if pose_update or self.map[square_number][matrix_position[1]][matrix_position[0]] == 0:
             # we only update if its a pose update, or  values that have nothing assigned to them yet
             self.map[square_number][matrix_position[1]][matrix_position[0]] = value
@@ -740,11 +693,8 @@ class Localization:
                 [math.cos(-self.pose[2]), -math.sin(-self.pose[2])],
                 [math.sin(-self.pose[2]), math.cos(-self.pose[2])]
             ])
-        print(rotation_matrix)
 
-        # print(sensor)
         point = np.array([self.sensors[sensor].pose[0], self.sensors[sensor].pose[1]])
-        # print(point)
         new_point = rotation_matrix@point
         
         
@@ -755,39 +705,19 @@ class Localization:
         point_value = 1 # self.verify_distance(sensor, distance)
         if not distance:
             return
-        # print(self.pose)
+
         modified_pose = self.get_sensor_aware_pose(sensor)
-        # print("md_p")
-        # print(modified_pose)
-        # exit()
         pose_coords = self.get_matrix_coords(modified_pose)
 
-        
-        
         # absolute position of detected point from the sensor
         absolute_position = self.get_absolute_position(modified_pose, distance)
-        # print(distance)
-        # print("tada?")
-        # print(absolute_position)
-        # print("The Two")
-        # exit()
         square_number, matrix_position = self.get_matrix_coords(absolute_position)
-        # print(square_number)
-        # print(matrix_position)
-        # exit()
+
         # resizes the matrix according to where the sensors have detected something/nothing
         # note: resize every square to the maximum distance from 0,0
         self.verify_matrix_sizes(square_number, matrix_position)
         
         self.insert_value_map(square_number, matrix_position, point_value)
-        
-        
-        # absolute_position_pose = self.get_absolute_position(modified_pose, 0.001)
-        # sensor_coords = self.get_matrix_coords(absolute_position_pose)
-        # self.insert_value_map(sensor_coords[0], sensor_coords[1], 5)
-        print(modified_pose)
-        print(square_number, matrix_position)
-        #print()
         
         self.fill_in_line_of_sight(square_number, matrix_position, absolute_position, [pose_coords, modified_pose])
         
@@ -797,7 +727,6 @@ class Localization:
         Given the current pose (with yaw), and the distance that a sensor has received,
         updates that data point in the localization matrix
         '''
-        
         
         if distance < 0:
             return
@@ -877,7 +806,7 @@ class Localization:
                 final_map += '\n'
                 
         self.map_print = final_map
-        #print(np.array(self.matrix_map))
+
         Printing.view_map(self.matrix_map, index)
 
 class Helpers:
@@ -944,11 +873,7 @@ class Helpers:
         if swapped:
             points.reverse()
         return points
-    
-    
-
-# res = Helpers.get_line_bresenham((0, 0), (3, 4))
-# print(res)    
+       
 
 from PIL import Image
 import numpy as np
@@ -983,14 +908,5 @@ class Printing:
                 for j in range(img.size[1]):
                     
                     pixels[i,j] = Printing.get_color(matrix[i][j]) # (v, v, v) # Set the colour accordingly
-
-            # img.show()
             
             img.save('Maze'+str(index)+'.bmp')
-            
-            
-# Printing.view_map([
-#     [1,1,1],
-#     [0,1,1],
-#     [0,0,1]]
-# )

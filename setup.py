@@ -19,8 +19,8 @@ setup(
     zip_safe=True,
     maintainer='usi',
     maintainer_email='eneregemen@gmail.com',
-    description='TODO: Package description',
-    license='TODO: License declaration',
+    description='ROS package that implements the RoboMaster-Maze-Mapping',
+    license='MIT',
 
     tests_require=['pytest'],
     entry_points={
