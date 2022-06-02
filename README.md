@@ -42,3 +42,10 @@ $ source ~/dev_ws/install/setup.bash
 $ ros2 launch Robomaster_Maze controller.launch.py robomaster_name:=robo1
 ```
 
+### Screenshots
+
+![Maze](Mapping-Outputs/test0 3.png?raw=true "Title")
+![Maze](Mapping-Outputs/test0 4.png?raw=true "Title")
+![Maze](Mapping-Outputs/LowresMAze.bmp?raw=true "Title")
+![Maze](Mapping-Outputs/My Maze Movie.mp4?raw=true "Title")
+
