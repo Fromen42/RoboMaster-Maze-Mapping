@@ -49,6 +49,7 @@ While running the program it creates a Maze0.bmp file and updates it everytime t
 
 ### Screenshots
 
+![Maze](Mapping-Outputs/test0 3.png?raw=true "Title")
 ![Maze](Mapping-Outputs/test0 4.png?raw=true "Title")
 
 
